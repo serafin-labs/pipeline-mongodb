@@ -1,0 +1,8 @@
+node_modules
+.history
+dist
+lib
+.cache-loader
+docker-compose.my.yml
+docker-compose.dev.yml
+.vscode/favorites.json

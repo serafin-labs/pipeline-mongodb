@@ -1,0 +1,13 @@
+version: "2"
+services:
+  app:
+    image: serafinlabs/nodejs:10-dev
+    command: "npm run-script dev"
+    ports:
+      - "9225:9229"
+    volumes:
+      - .:/srv
+  mongo:
+    image: mongo
+    ports:
+      - "27017:27017"

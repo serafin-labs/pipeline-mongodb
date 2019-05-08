@@ -1,0 +1,12 @@
+{
+    "rules": {
+        "semicolon": [
+            true,
+            "never"
+        ],
+        "no-empty": [
+            true,
+            "allow-empty-catch"
+        ]
+    }
+}

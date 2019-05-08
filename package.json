@@ -1,0 +1,63 @@
+{
+  "name": "@serafin/pipeline-mongodb",
+  "version": "0.1.0",
+  "description": "Serafin pipeline for the MongoDB database",
+  "contributors": [
+    {
+      "name": "Nicolas Degardin",
+      "email": "degardin.n@gmail.com"
+    },
+    {
+      "name": "Sébastien de Saint Florent",
+      "email": "sebastien.dsf@gmail.com"
+    }
+  ],
+  "keywords": [
+    "crud",
+    "mongodb",
+    "database",
+    "serafin",
+    "pipeline",
+    "typescript"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/serafin-labs/pipeline-mongodb"
+  },
+  "dependencies": {
+    "@serafin/pipeline": "^0.11.0",
+    "@serafin/schema-builder": "^0.6.2",
+    "lodash": "^4.17.11",
+    "mongodb": "^3.2.3"
+  },
+  "devDependencies": {
+    "chai-as-promised": "^7.1.1",
+    "@types/chai": "^4.1.7",
+    "@types/chai-as-promised": "^7.1.0",
+    "@types/mocha": "^5.2.6",
+    "@types/node": "^12.0.0",
+    "@types/node-uuid": "0.0.28",
+    "awesome-typescript-loader": "^5.2.1",
+    "chai": "^4.2.0",
+    "clean-webpack-plugin": "^2.0.2",
+    "istanbul": "^0.4.5",
+    "mocha": "^6.1.4",
+    "nodemon": "^1.19.0",
+    "remap-istanbul": "^0.13.0",
+    "typescript": "^3.4.0",
+    "webpack": "^4.30.0",
+    "webpack-cli": "^3.3.2",
+    "webpack-node-externals": "^1.7.2",
+    "webpack-shell-plugin": "^0.5.0"
+  },
+  "scripts": {
+    "test": "node_modules/.bin/istanbul cover --dir ./lib/coverage/ node_modules/.bin/_mocha -- --inspect-brk -R spec ./lib/test.js && node_modules/.bin/remap-istanbul -i ./lib/coverage/coverage.json -e lib/webpack/bootstrap -t lcovonly -o ./lib/coverage/lcov.info && node_modules/.bin/remap-istanbul -i ./lib/coverage/coverage.json -e lib/webpack/bootstrap -t html -o ./lib/coverage/lcov-report",
+    "debug": "node_modules/.bin/mocha -R spec ./lib/test.js --inspect-brk=[::]:9229",
+    "predev": "npm install",
+    "dev": "npm run-script watch-dev",
+    "watch-dev": "node_modules/.bin/webpack --mode development --watch",
+    "build": "webpack --mode production",
+    "prepublishOnly": "npm install && npm run-script build && npm run-script build-test && npm test"
+  }
+}
