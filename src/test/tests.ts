@@ -9,8 +9,8 @@ chai.use(require("chai-as-promised"))
 const MongoClient = mongodb.MongoClient;
 const url = 'mongodb://localhost:27017/test';
 
-const connect = async (): Promise<MongoClient> => new Promise((resolve, reject) => {
-    MongoClient.connect(url, {}, function(err, db) {
+const connect = async (): Promise<typeof MongoClient> => new Promise((resolve, reject) => {
+    MongoClient.connect(url, {}, function (err: any, db: any) {
         if (err) {
             reject(err)
         }
@@ -19,7 +19,7 @@ const connect = async (): Promise<MongoClient> => new Promise((resolve, reject) 
 })
 
 describe('MongoDbPipeline', async () => {
-    const db:any
+    let db: any
 
     beforeEach(async () => {
         db = await connect()
@@ -38,28 +38,28 @@ describe('MongoDbPipeline', async () => {
 
     it('should create an entry', async () => {
         const pipeline = new PipelineMongoDb(SchemaBuilder.emptySchema().addString("id").addString("myString").addNumber("myNumber"), "test", db)
-        let r = await pipeline.create([{id: 'id1', myString: "test", myNumber: 2}])
-        expect(r.data).to.be.deep.equal([{id: 'id1', myString: "test", myNumber: 2}]);
+        let r = await pipeline.create([{ id: 'id1', myString: "test", myNumber: 2 }])
+        expect(r.data).to.be.deep.equal([{ id: 'id1', myString: "test", myNumber: 2 }]);
     })
 
     it('should read all entries', async () => {
         const pipeline = new PipelineMongoDb(SchemaBuilder.emptySchema().addString("id").addString("myString").addNumber("myNumber"), "test", db)
-        await pipeline.create([{id: 'id1', myString: "test1", myNumber: 3}])
-        await pipeline.create([{id: 'id2', myString: "test2", myNumber: 1}])
+        await pipeline.create([{ id: 'id1', myString: "test1", myNumber: 3 }])
+        await pipeline.create([{ id: 'id2', myString: "test2", myNumber: 1 }])
         let r = await pipeline.read()
         expect(r.data).to.be.deep.equal([
-            {id: 'id1', myString: "test1", myNumber: 3},
-            {id: 'id2', myString: "test2", myNumber: 1}
+            { id: 'id1', myString: "test1", myNumber: 3 },
+            { id: 'id2', myString: "test2", myNumber: 1 }
         ])
     })
 
     it('should read one entry', async () => {
         const pipeline = new PipelineMongoDb(SchemaBuilder.emptySchema().addString("id").addString("myString").addNumber("myNumber"), "test", db)
-        await pipeline.create([{id: 'id1', myString: "test1", myNumber: 3}])
-        await pipeline.create([{id: 'id2', myString: "test2", myNumber: 1}])
-        let r = await pipeline.read({id: "id2"})
+        await pipeline.create([{ id: 'id1', myString: "test1", myNumber: 3 }])
+        await pipeline.create([{ id: 'id2', myString: "test2", myNumber: 1 }])
+        let r = await pipeline.read({ id: "id2" })
         expect(r.data).to.be.deep.equal([
-            {id: 'id2', myString: "test2", myNumber: 1}
+            { id: 'id2', myString: "test2", myNumber: 1 }
         ])
     })
 })
