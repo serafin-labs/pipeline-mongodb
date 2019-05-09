@@ -23,17 +23,26 @@ module.exports = function (env, argv) {
         externals: [nodeExternals()],
         devtool: 'nosources-source-map',
         watchOptions: {
-            poll: 1000,
             ignored: /node_modules|lib/
         },
+        optimization: {
+            minimize: false,
+            nodeEnv: isProduction ? 'production' : 'development'
+        },
         module: {
-            rules: [
-                {
-                    test: /\.tsx?$/,
-                    loader: 'awesome-typescript-loader',
-                    exclude: /node_modules|lib/
-                },
-            ]
+            rules: [{
+                test: /\.tsx?$/,
+                use: [
+                    'cache-loader',
+                    {
+                        loader: 'ts-loader',
+                        options: {
+                            transpileOnly: true
+                        }
+                    }],
+                exclude: /node_modules/,
+                include: path.resolve('src')
+            }]
         },
         optimization: {
             minimize: false
@@ -45,8 +54,8 @@ module.exports = function (env, argv) {
             path: path.resolve(__dirname, 'lib')
         },
         plugins: [
-            ...(!isProduction ? [new WebpackShellPlugin({ onBuildEnd: ['npm test'] })] : []),
-            ...(isProduction ? [new CleanWebpackPlugin(["lib"])] : []),
+            ...(!isProduction ? [new WebpackShellPlugin({ onBuildExit: ['npm test'] })] : []),
+            ...(isProduction ? [new CleanWebpackPlugin()] : []),
         ]
     }];
 
