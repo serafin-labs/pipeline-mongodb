@@ -1,6 +1,6 @@
 {
   "name": "@serafin/pipeline-mongodb",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Serafin pipeline for the MongoDB database",
   "contributors": [
     {
