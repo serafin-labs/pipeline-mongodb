@@ -2,62 +2,64 @@ import { PipelineAbstract } from "@serafin/pipeline";
 import { SchemaBuilder } from "@serafin/schema-builder";
 import * as chai from "chai";
 import { expect } from "chai";
-import { Logger, MongoClient } from "mongodb";
 import { PipelineMongoDb } from "../index";
-
-async function configureMongo() {
-    const connect = async (retries: number = 5, delay: number = 2000): Promise<MongoClient> => {
-        try {
-            return await MongoClient.connect(config.mongodbConnexionString, {
-                appname: "test",
-                useNewUrlParser: true,
-            })
-        } catch (e) {
-            if (retries < 1) {
-                throw Error("Connection to mongodb failed, too many retries")
-            } else {
-                console.log(`Connection to mongodb failed, retry in ${delay}ms`)
-                await new Promise(resolve => setTimeout(resolve, delay))
-                return await connect(--retries)
-            }
-        }
-    }
-
-    let client = await connect()
-
-    console.log("Connected to mongodb")
-    if (!config.isProduction) {
-        Logger.setLevel("info")
-    }
-
-    const db = client.db(config.mongodbDatabase)
-    const registerDb = client.db(config.mongodbRegisterDatabase)
-    return [db, registerDb]
-}
-
-let mongoInitialization = configureMongo()
-
-const db = mongoInitialization.then(r => r[0])
-const registerDb = mongoInitialization.then(r => r[1])
-
+import * as mongodb from 'mongo-mock';
 chai.use(require("chai-as-promised"))
 
-const pipeline = new PipelineMongoDb(SchemaBuilder.emptySchema().addString("myString").addNumber("myNumber"), "test", db)
+const MongoClient = mongodb.MongoClient;
+const url = 'mongodb://localhost:27017/test';
 
-describe('MongoDbPipeline', function () {
-    it('should be implemented by a concrete class', function () {
+const connect = async (): Promise<MongoClient> => new Promise((resolve, reject) => {
+    MongoClient.connect(url, {}, function(err, db) {
+        if (err) {
+            reject(err)
+        }
+        resolve(db)
+    })
+})
+
+describe('MongoDbPipeline', async () => {
+    const db:any
+
+    beforeEach(async () => {
+        db = await connect()
+    });
+
+    afterEach(async () => {
+        db.collection('test').toJSON().documents = []
+        await db.close()
+    });
+
+    it('should be implemented by a concrete class', async () => {
+        const pipeline = new PipelineMongoDb(SchemaBuilder.emptySchema().addString("id").addString("myString").addNumber("myNumber"), "test", db)
         expect(pipeline).to.be.an.instanceOf(PipelineMongoDb);
         expect(pipeline).to.be.an.instanceOf(PipelineAbstract);
-    });
+    })
 
-    it('should create an entry', function () {
-        let r = pipeline.create([{'myString': "test", 'myNumber': 2}])
-        console.log(r.data)
-    });
+    it('should create an entry', async () => {
+        const pipeline = new PipelineMongoDb(SchemaBuilder.emptySchema().addString("id").addString("myString").addNumber("myNumber"), "test", db)
+        let r = await pipeline.create([{id: 'id1', myString: "test", myNumber: 2}])
+        expect(r.data).to.be.deep.equal([{id: 'id1', myString: "test", myNumber: 2}]);
+    })
 
-    it('should read an entry', function () {
-        pipeline.create([{myString: "test2", myNumber: 1}])
-        let r = pipeline.read({myNumber: 1})
-        console.log(r.data)
-    });
+    it('should read all entries', async () => {
+        const pipeline = new PipelineMongoDb(SchemaBuilder.emptySchema().addString("id").addString("myString").addNumber("myNumber"), "test", db)
+        await pipeline.create([{id: 'id1', myString: "test1", myNumber: 3}])
+        await pipeline.create([{id: 'id2', myString: "test2", myNumber: 1}])
+        let r = await pipeline.read()
+        expect(r.data).to.be.deep.equal([
+            {id: 'id1', myString: "test1", myNumber: 3},
+            {id: 'id2', myString: "test2", myNumber: 1}
+        ])
+    })
+
+    it('should read one entry', async () => {
+        const pipeline = new PipelineMongoDb(SchemaBuilder.emptySchema().addString("id").addString("myString").addNumber("myNumber"), "test", db)
+        await pipeline.create([{id: 'id1', myString: "test1", myNumber: 3}])
+        await pipeline.create([{id: 'id2', myString: "test2", myNumber: 1}])
+        let r = await pipeline.read({id: "id2"})
+        expect(r.data).to.be.deep.equal([
+            {id: 'id2', myString: "test2", myNumber: 1}
+        ])
+    })
 })
