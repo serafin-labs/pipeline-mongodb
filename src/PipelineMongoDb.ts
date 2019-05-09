@@ -241,7 +241,7 @@ export class PipelineMongoDb<M extends IdentityInterface, S extends SchemaBuilde
         // get the results
         let data = await cursor.toArray()
         let result: ResultsInterface<this["schemaBuilders"]["model"]["T"], this["schemaBuilders"]["readMeta"]["T"]> = {
-            data: this.filterOutput(data.map(MongodbPipelineSource.fromMongoFormat)),
+            data: this.filterOutput(data.map(PipelineMongoDb.fromMongoFormat)),
             meta: await this.getMeta(db.collection(this.collectionName), cursor, query, options)
         }
 
@@ -256,7 +256,7 @@ export class PipelineMongoDb<M extends IdentityInterface, S extends SchemaBuilde
         const db = await this.db
         // if resources have explicit identifiers, map them to _id
         // insert data in database
-        let insertResult = await db.collection(this.collectionName).insertMany(resources.map(MongodbPipelineSource.toMongoFormat))
+        let insertResult = await db.collection(this.collectionName).insertMany(resources.map(PipelineMongoDb.toMongoFormat))
         // map resulting ids to the resource
         let results = resources.map((r: M, index: number) => {
             if (!r.id) {
@@ -285,7 +285,7 @@ export class PipelineMongoDb<M extends IdentityInterface, S extends SchemaBuilde
         // insert data in database
         let replaceResult = await db.collection(this.collectionName).replaceOne({
             _id: mongodb.ObjectID.createFromHexString(id)
-        }, MongodbPipelineSource.toMongoFormat(values))
+        }, PipelineMongoDb.toMongoFormat(values))
         let result: ResultsInterface<this["schemaBuilders"]["model"]["T"], this["schemaBuilders"]["replaceMeta"]["T"]> = {
             data: this.filterOutput([values]),
             meta: {} as any
@@ -324,14 +324,14 @@ export class PipelineMongoDb<M extends IdentityInterface, S extends SchemaBuilde
             }
         }
         // patch all documents matching the query
-        let patch = this.toMongoPatchFormat(MongodbPipelineSource.toMongoFormat(values))
+        let patch = this.toMongoPatchFormat(PipelineMongoDb.toMongoFormat(values))
         let patchResult = await db.collection(this.collectionName).updateMany(matchingQuery, patch)
 
         let data = [] as any[]
         let cursor2 = db.collection(this.collectionName).find(matchingQuery, { limit: matchingData.length })
         data = await cursor2.toArray()
         let result: ResultsInterface<this["schemaBuilders"]["model"]["T"], this["schemaBuilders"]["patchMeta"]["T"]> = {
-            data: this.filterOutput(data.map(MongodbPipelineSource.fromMongoFormat)),
+            data: this.filterOutput(data.map(PipelineMongoDb.fromMongoFormat)),
             meta: {
                 updatedCount: patchResult.modifiedCount
             }
@@ -371,7 +371,7 @@ export class PipelineMongoDb<M extends IdentityInterface, S extends SchemaBuilde
         })
 
         let result: ResultsInterface<this["schemaBuilders"]["model"]["T"], this["schemaBuilders"]["deleteMeta"]["T"]> = {
-            data: this.filterOutput(data.map(MongodbPipelineSource.fromMongoFormat)),
+            data: this.filterOutput(data.map(PipelineMongoDb.fromMongoFormat)),
             meta: {
                 deletedCount: deleteResult.deletedCount
             }
