@@ -7,7 +7,7 @@ import { PipelineMongoDb, readOptionsSchema, readMetaSchema } from "./PipelineMo
 /**
  * Pipeline performing an aggregation query
  */
-export class PipelineMongoDbAggregate<M extends IdentityInterface, Q, RQ extends SchemaBuilder<any> = ReturnType<PipelineMongoDbAggregate<M, Q, null>["readQuerySchema"]>,
+export class PipelineMongoDbAggregate<M extends { id: string }, Q, RQ extends SchemaBuilder<any> = ReturnType<PipelineMongoDbAggregate<M, Q, null>["readQuerySchema"]>,
     S extends SchemaBuildersInterface = ReturnType<PipelineMongoDbAggregate<M, Q, RQ, null>["newSchema"]>>
     extends PipelineMongoDb<M, S>{
     constructor(modelSchemaBuilder: SchemaBuilder<M>, collectionName: string,
@@ -55,7 +55,7 @@ export class PipelineMongoDbAggregate<M extends IdentityInterface, Q, RQ extends
      * @param modelSchemaBuilder
      */
     protected readQuerySchema(modelSchemaBuilder: SchemaBuilder<M>) {
-        return super.schemaBuilders.readQuery.mergeProperties(this.querySchemaBuilder)
+        return super.getSchemaBuilders().readQuery.mergeProperties(this.querySchemaBuilder)
     }
 
     protected async getMeta(collection: mongodb.Collection<any>, cursor: mongodb.Cursor | mongodb.AggregationCursor, query: any, options?: any) {

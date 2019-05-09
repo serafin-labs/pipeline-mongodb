@@ -85,7 +85,7 @@ export class PipelineMongoDb<M extends IdentityInterface, S extends SchemaBuilde
      * Overwrite defaultSchema to add additional options and meta to it
      * @param modelSchemaBuilder
      */
-    protected mongodbPipelineDefaultSchema(modelSchemaBuilder: SchemaBuilder<M>) {
+    mongodbPipelineDefaultSchema(modelSchemaBuilder: SchemaBuilder<M>) {
         return {
             model: modelSchemaBuilder,
             createValues: modelSchemaBuilder.setOptionalProperties(["id"]),
